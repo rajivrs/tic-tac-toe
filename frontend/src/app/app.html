@@ -1,0 +1,68 @@
+<header class="app-header">
+  <h1>Tic Tac Toe</h1>
+  <p class="subtitle">Angular frontend · .NET backend · all rules enforced server-side</p>
+</header>
+
+@if (error(); as message) {
+  <div class="alert" role="alert">
+    <span>{{ message }}</span>
+    <button type="button" class="link" (click)="dismissError()">Dismiss</button>
+  </div>
+}
+
+@if (game(); as g) {
+  <main class="layout">
+    <section class="card play" aria-label="Game">
+      <div class="mode-switch" role="group" aria-label="Game mode">
+        <button
+          type="button"
+          [class.active]="g.mode === 'TwoPlayer'"
+          [attr.aria-pressed]="g.mode === 'TwoPlayer'"
+          [disabled]="busy()"
+          (click)="onModeChange('TwoPlayer')"
+        >Two Player</button>
+        <button
+          type="button"
+          [class.active]="g.mode === 'VsComputer'"
+          [attr.aria-pressed]="g.mode === 'VsComputer'"
+          [disabled]="busy()"
+          (click)="onModeChange('VsComputer')"
+        >Play Against Computer</button>
+      </div>
+      <p class="mode-label" data-testid="mode-label">{{ modeLabel() }}</p>
+
+      <div
+        class="status"
+        [class.won]="g.status === 'Won'"
+        [class.draw]="g.status === 'Draw'"
+        role="status"
+        aria-live="polite"
+      >
+        @if (badgePlayer(); as player) {
+          <span class="badge" [class.x]="player === 'X'" [class.o]="player === 'O'">{{ player }}</span>
+        }
+        <span data-testid="status-message">{{ statusMessage() }}</span>
+      </div>
+
+      <app-board
+        [cells]="g.board"
+        [winningCells]="g.winningCells"
+        [disabled]="boardLocked()"
+        (cellSelected)="onCellSelected($event)"
+      />
+
+      <div class="actions">
+        <button type="button" class="primary" [disabled]="busy()" (click)="onResetGame()">Reset Game</button>
+        <button type="button" [disabled]="busy() || !g.canUndo" (click)="onUndo()">Undo Last Move</button>
+        <button type="button" class="danger" [disabled]="busy()" (click)="onResetScoreboard()">Reset Scoreboard</button>
+      </div>
+    </section>
+
+    <aside class="side">
+      <app-scoreboard [score]="g.scoreboard" />
+      <app-move-history [moves]="g.moves" />
+    </aside>
+  </main>
+} @else if (!error()) {
+  <p class="loading">Starting a new game…</p>
+}
